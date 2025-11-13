@@ -109,7 +109,8 @@ class _SignupScreenState extends State<SignupScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
+      // Use theme-based background color
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -144,12 +145,12 @@ class _SignupScreenState extends State<SignupScreen>
                       ),
                       const SizedBox(height: 32),
                       // Title
-                      const Text(
+                      Text(
                         'Create Account',
                         style: TextStyle(
                           fontSize: 32,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.primary,
+                          color: Theme.of(context).textTheme.headlineMedium?.color ?? AppColors.primary,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -157,7 +158,7 @@ class _SignupScreenState extends State<SignupScreen>
                         'Sign up to get started',
                         style: TextStyle(
                           fontSize: 16,
-                          color: Colors.grey[600],
+                          color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7) ?? Colors.grey[600],
                         ),
                       ),
                       const SizedBox(height: 32),
@@ -166,13 +167,17 @@ class _SignupScreenState extends State<SignupScreen>
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Colors.red[50],
+                            color: Theme.of(context).brightness == Brightness.dark 
+                                ? Colors.red[900]?.withOpacity(0.3) 
+                                : Colors.red[50],
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
                             _errorMessage!,
                             style: TextStyle(
-                              color: Colors.red[700],
+                              color: Theme.of(context).brightness == Brightness.dark 
+                                  ? Colors.red[200] 
+                                  : Colors.red[700],
                               fontSize: 14,
                             ),
                           ),
@@ -222,7 +227,7 @@ class _SignupScreenState extends State<SignupScreen>
                           Text(
                             "Already have an account?",
                             style: TextStyle(
-                              color: Colors.grey[600],
+                              color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7) ?? Colors.grey[600],
                             ),
                           ),
                           TextButton(

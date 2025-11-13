@@ -104,4 +104,49 @@ class ChatService {
       }
     });
   }
+
+  // Delete a message
+  Future<void> deleteMessage(String chatId, String messageId) async {
+    try {
+      User? currentUser = _auth.currentUser;
+      if (currentUser == null) {
+        throw Exception('User not authenticated');
+      }
+
+      // Check if user is the sender of the message
+      DataSnapshot snapshot = await _db
+          .child('chats')
+          .child(chatId)
+          .child('messages')
+          .child(messageId)
+          .get();
+
+      if (snapshot.exists) {
+        Map<String, dynamic> messageData =
+            Map<String, dynamic>.from(snapshot.value as Map);
+        
+        if (messageData['senderId'] == currentUser.uid) {
+          // Delete the message
+          await _db
+              .child('chats')
+              .child(chatId)
+              .child('messages')
+              .child(messageId)
+              .remove();
+        } else {
+          throw Exception('You can only delete your own messages');
+        }
+      } else {
+        throw Exception('Message not found');
+      }
+    } on FirebaseException catch (e) {
+      throw Exception('Failed to delete message: ${e.message}');
+    } catch (e) {
+      if (e is Exception) {
+        rethrow;
+      } else {
+        throw Exception('An unexpected error occurred while deleting the message');
+      }
+    }
+  }
 }

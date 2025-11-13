@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/animation.dart';
-import 'package:flutter/services.dart'; // Add this import for Clipboard
+import 'package:flutter/services.dart';
 import '../models/message_model.dart';
 import '../utils/constants.dart';
+import '../services/chat_service.dart';
 
 class MessageBubble extends StatefulWidget {
   final MessageModel message;
   final bool isMe;
+  final String chatId; // Add chatId parameter
 
   const MessageBubble({
     Key? key,
     required this.message,
     required this.isMe,
+    required this.chatId, // Add chatId parameter
   }) : super(key: key);
 
   @override
@@ -22,6 +25,7 @@ class _MessageBubbleState extends State<MessageBubble>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<Offset> _offsetAnimation;
+  final ChatService _chatService = ChatService(); // Add chat service
 
   @override
   void initState() {
@@ -110,12 +114,7 @@ class _MessageBubbleState extends State<MessageBubble>
                 onTap: () {
                   Navigator.pop(context);
                   // Delete message functionality
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Delete feature coming soon!'),
-                      duration: Duration(seconds: 1),
-                    ),
-                  );
+                  _deleteMessage(context);
                 },
               ),
               const Divider(),
@@ -130,6 +129,30 @@ class _MessageBubbleState extends State<MessageBubble>
         );
       },
     );
+  }
+
+  Future<void> _deleteMessage(BuildContext context) async {
+    try {
+      await _chatService.deleteMessage(widget.chatId, widget.message.id);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Message deleted successfully'),
+            duration: Duration(seconds: 1),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to delete message: ${e.toString()}'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    }
   }
 
   @override

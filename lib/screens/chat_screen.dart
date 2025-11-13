@@ -119,6 +119,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         key: ValueKey(message.id),
                         message: message,
                         isMe: isMe,
+                        chatId: widget.chatId, // Pass chatId to message bubble
                       ),
                     );
                   },

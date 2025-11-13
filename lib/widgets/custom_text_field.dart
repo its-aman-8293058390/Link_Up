@@ -34,17 +34,34 @@ class CustomTextField extends StatelessWidget {
       validator: validator,
       onChanged: onChanged,
       maxLines: maxLines,
+      style: TextStyle(
+        // Ensure text is visible in both light and dark modes
+        color: Theme.of(context).textTheme.bodyMedium?.color,
+      ),
       decoration: InputDecoration(
         labelText: labelText,
-        prefixIcon: prefixIcon != null ? Icon(prefixIcon) : null,
+        labelStyle: TextStyle(
+          // Ensure label text is visible in both light and dark modes
+          color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
+        ),
+        prefixIcon: prefixIcon != null ? Icon(prefixIcon, color: Theme.of(context).iconTheme.color) : null,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(
+            color: Theme.of(context).dividerColor,
+          ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(
             color: Color(0xFF6C63FF),
             width: 2,
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(
+            color: Theme.of(context).dividerColor,
           ),
         ),
       ),

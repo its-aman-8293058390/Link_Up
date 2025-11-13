@@ -132,6 +132,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                         key: ValueKey(message.id),
                         message: message,
                         isMe: isMe,
+                        chatId: widget.chatId, // Pass chatId to message bubble
                       ),
                     );
                   },
