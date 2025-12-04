@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'firebase_options.dart';
 import 'screens/splash_screen.dart';
 import 'screens/login_screen.dart';
+import 'screens/signup_screen.dart';
 import 'screens/chat_list_screen.dart';
 import 'utils/constants.dart';
 
@@ -54,6 +55,11 @@ class MyApp extends StatelessWidget {
       ),
       themeMode: ThemeMode.system, // Follow system theme
       home: const SplashScreen(),
+      routes: {
+        '/login': (context) => const LoginScreen(),
+        '/signup': (context) => const SignupScreen(),
+        '/home': (context) => const ChatListScreen(),
+      },
       debugShowCheckedModeBanner: false,
     );
   }

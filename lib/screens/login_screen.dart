@@ -79,28 +79,40 @@ class _LoginScreenState extends State<LoginScreen>
           _passwordController.text,
         );
 
-        if (user != null) {
-          if (mounted) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const ChatListScreen(),
-              ),
-            );
-          }
+        // Check if user was signed in successfully
+        if (user != null && mounted) {
+          // Navigate to chat list screen
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const ChatListScreen(),
+            ),
+          );
+        } else if (mounted) {
+          setState(() {
+            _errorMessage = 'Failed to sign in. Please try again.';
+          });
         }
       } on FirebaseAuthException catch (e) {
-        setState(() {
-          _errorMessage = e.message ?? 'An error occurred during login';
-        });
+        if (mounted) {
+          setState(() {
+            _errorMessage = e.message ?? 'An error occurred during login';
+          });
+        }
       } catch (e) {
-        setState(() {
-          _errorMessage = 'An error occurred during login';
-        });
+        if (mounted) {
+          setState(() {
+            _errorMessage = e is Exception 
+                ? e.toString().replaceAll('Exception:', '').trim() 
+                : 'An unexpected error occurred during login';
+          });
+        }
       } finally {
-        setState(() {
-          _isLoading = false;
-        });
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
       }
     }
   }

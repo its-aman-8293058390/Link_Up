@@ -4,6 +4,7 @@ import 'dart:async';
 import '../utils/constants.dart';
 import 'onboarding_screen.dart';
 import 'login_screen.dart';
+import 'chat_list_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -69,7 +70,7 @@ class _SplashScreenState extends State<SplashScreen>
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => user != null ? const LoginScreen() : const OnboardingScreen(),
+          builder: (context) => user != null ? const ChatListScreen() : const OnboardingScreen(),
         ),
       );
     }

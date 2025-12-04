@@ -16,12 +16,6 @@ class AuthService {
   Future<UserModel?> signUpWithEmailAndPassword(
       String email, String password) async {
     try {
-      // Validate password
-      if (!isValidPassword(password)) {
-        throw Exception(
-            'Password must be at least 8 characters with letters, numbers, and special symbols');
-      }
-
       UserCredential result = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
@@ -33,12 +27,14 @@ class AuthService {
         // Create user in database
         UserModel userModel = UserModel(
           uid: user.uid,
-          email: user.email!,
+          email: user.email ?? email, // Use provided email as fallback
         );
 
         await _db.child('users').child(user.uid).set(userModel.toMap());
 
         return userModel;
+      } else {
+        throw Exception('Failed to create user account. Please try again.');
       }
     } on FirebaseAuthException catch (e) {
       // Handle specific Firebase auth errors
@@ -52,17 +48,16 @@ class AuthService {
         case 'weak-password':
           throw Exception('The password is too weak. Please use a stronger password.');
         default:
-          throw Exception('An error occurred during signup: ${e.message}');
+          throw Exception('An error occurred during signup: ${e.message ?? 'Unknown error'}');
       }
     } catch (e) {
       // Handle general errors
       if (e is Exception) {
         rethrow;
       } else {
-        throw Exception('An unexpected error occurred during signup.');
+        throw Exception('An unexpected error occurred during signup: ${e.toString()}');
       }
     }
-    return null;
   }
 
   // Sign in with email and password
@@ -127,14 +122,5 @@ class AuthService {
     await _auth.signOut();
   }
 
-  // Password validation
-  bool isValidPassword(String password) {
-    if (password.length < 8) return false;
 
-    bool hasLetter = RegExp(r'[a-zA-Z]').hasMatch(password);
-    bool hasDigit = RegExp(r'\d').hasMatch(password);
-    bool hasSpecialChar = RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(password);
-
-    return hasLetter && hasDigit && hasSpecialChar;
-  }
 }

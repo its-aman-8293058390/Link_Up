@@ -137,7 +137,22 @@ class _ChatListScreenState extends State<ChatListScreen> {
               color: Colors.white,
             ),
             onPressed: () async {
-              await FirebaseAuth.instance.signOut();
+              try {
+                await FirebaseAuth.instance.signOut();
+                // Navigate to login screen after sign out
+                if (mounted) {
+                  Navigator.pushReplacementNamed(context, '/login');
+                }
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Failed to sign out: ${e.toString()}'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              }
             },
           ),
         ],

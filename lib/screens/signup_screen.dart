@@ -7,6 +7,7 @@ import '../utils/validators.dart';
 import '../utils/constants.dart';
 import 'login_screen.dart';
 import 'chat_list_screen.dart'; // Changed from home_screen.dart
+import 'profile_setup_screen.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({Key? key}) : super(key: key);
@@ -80,28 +81,40 @@ class _SignupScreenState extends State<SignupScreen>
           _passwordController.text,
         );
 
-        if (user != null) {
-          if (mounted) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const ChatListScreen(), // Changed from HomeScreen
-              ),
-            );
-          }
+        // Check if user was created successfully
+        if (user != null && mounted) {
+          // Navigate to profile setup screen
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const ProfileSetupScreen(),
+            ),
+          );
+        } else if (mounted) {
+          setState(() {
+            _errorMessage = 'Failed to create user account. Please try again.';
+          });
         }
       } on FirebaseAuthException catch (e) {
-        setState(() {
-          _errorMessage = e.message ?? 'An error occurred during signup';
-        });
+        if (mounted) {
+          setState(() {
+            _errorMessage = e.message ?? 'An error occurred during signup';
+          });
+        }
       } catch (e) {
-        setState(() {
-          _errorMessage = 'An error occurred during signup';
-        });
+        if (mounted) {
+          setState(() {
+            _errorMessage = e is Exception 
+                ? e.toString().replaceAll('Exception:', '').trim() 
+                : 'An unexpected error occurred during signup';
+          });
+        }
       } finally {
-        setState(() {
-          _isLoading = false;
-        });
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
       }
     }
   }

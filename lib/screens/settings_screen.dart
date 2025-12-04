@@ -1,15 +1,49 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import '../utils/constants.dart';
-import 'profile_setup_screen.dart';
+import '../models/user_model.dart';
+import 'profile_screen.dart'; // Changed from profile_setup_screen.dart
 import 'account_settings_screen.dart';
 import 'privacy_settings_screen.dart';
 import 'theme_settings_screen.dart';
 import 'help_screen.dart';
 import 'invite_friends_screen.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
+
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  final DatabaseReference _db = FirebaseDatabase.instance.ref();
+  UserModel? _userModel;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserProfile();
+  }
+
+  Future<void> _fetchUserProfile() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) return;
+
+      final snapshot = await _db.child('users').child(user.uid).get();
+      
+      if (snapshot.exists) {
+        final userData = Map<String, dynamic>.from(snapshot.value as Map);
+        setState(() {
+          _userModel = UserModel.fromMap(userData, user.uid);
+        });
+      }
+    } catch (e) {
+      // Silently fail, we'll just show default values
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,10 +64,16 @@ class SettingsScreen extends StatelessWidget {
                     color: AppColors.primary,
                     shape: BoxShape.circle,
                   ),
-                  child: const Center(
-                    child: Icon(
-                      Icons.person,
-                      color: Colors.white,
+                  child: Center(
+                    child: Text(
+                      _userModel?.displayName?.isNotEmpty == true 
+                          ? _userModel!.displayName!.substring(0, 1).toUpperCase() 
+                          : FirebaseAuth.instance.currentUser?.email?.substring(0, 1).toUpperCase() ?? 'U',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
@@ -42,9 +82,9 @@ class SettingsScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'User Name',
-                        style: TextStyle(
+                      Text(
+                        _userModel?.displayName ?? 'User Name',
+                        style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
                         ),
@@ -62,13 +102,17 @@ class SettingsScreen extends StatelessWidget {
                 ),
                 IconButton(
                   icon: const Icon(Icons.edit),
-                  onPressed: () {
-                    Navigator.push(
+                  onPressed: () async {
+                    final result = await Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const ProfileSetupScreen(),
+                        builder: (context) => const ProfileScreen(), // Changed to ProfileScreen
                       ),
                     );
+                    // Refresh profile data when returning
+                    if (result == true || result == null) {
+                      _fetchUserProfile();
+                    }
                   },
                 ),
               ],
@@ -81,13 +125,17 @@ class SettingsScreen extends StatelessWidget {
             context,
             Icons.account_circle,
             'Profile',
-            () {
-              Navigator.push(
+            () async {
+              final result = await Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const ProfileSetupScreen(),
+                  builder: (context) => const ProfileScreen(), // Changed to ProfileScreen
                 ),
               );
+              // Refresh profile data when returning
+              if (result == true || result == null) {
+                _fetchUserProfile();
+              }
             },
           ),
           _buildSettingsItem(

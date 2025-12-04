@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class CustomTextField extends StatelessWidget {
+class CustomTextField extends StatefulWidget {
   final String labelText;
   final IconData? prefixIcon;
   final bool obscureText;
@@ -10,6 +10,8 @@ class CustomTextField extends StatelessWidget {
   final String? initialValue;
   final TextEditingController? controller;
   final int? maxLines;
+  final bool readOnly;
+  final VoidCallback? onTap;
 
   const CustomTextField({
     Key? key,
@@ -22,29 +24,59 @@ class CustomTextField extends StatelessWidget {
     this.initialValue,
     this.controller,
     this.maxLines,
+    this.readOnly = false,
+    this.onTap,
   }) : super(key: key);
+
+  @override
+  State<CustomTextField> createState() => _CustomTextFieldState();
+}
+
+class _CustomTextFieldState extends State<CustomTextField> {
+  late bool _obscureText;
+
+  @override
+  void initState() {
+    super.initState();
+    _obscureText = widget.obscureText;
+  }
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
-      controller: controller,
-      initialValue: initialValue,
-      obscureText: obscureText,
-      keyboardType: keyboardType,
-      validator: validator,
-      onChanged: onChanged,
-      maxLines: maxLines,
+      controller: widget.controller,
+      initialValue: widget.initialValue,
+      obscureText: _obscureText,
+      keyboardType: widget.keyboardType,
+      validator: widget.validator,
+      onChanged: widget.onChanged,
+      maxLines: widget.maxLines,
+      readOnly: widget.readOnly,
+      onTap: widget.onTap,
       style: TextStyle(
         // Ensure text is visible in both light and dark modes
         color: Theme.of(context).textTheme.bodyMedium?.color,
       ),
       decoration: InputDecoration(
-        labelText: labelText,
+        labelText: widget.labelText,
         labelStyle: TextStyle(
           // Ensure label text is visible in both light and dark modes
           color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
         ),
-        prefixIcon: prefixIcon != null ? Icon(prefixIcon, color: Theme.of(context).iconTheme.color) : null,
+        prefixIcon: widget.prefixIcon != null ? Icon(widget.prefixIcon, color: Theme.of(context).iconTheme.color) : null,
+        suffixIcon: widget.obscureText
+            ? IconButton(
+                icon: Icon(
+                  _obscureText ? Icons.visibility_off : Icons.visibility,
+                  color: Theme.of(context).iconTheme.color,
+                ),
+                onPressed: () {
+                  setState(() {
+                    _obscureText = !_obscureText;
+                  });
+                },
+              )
+            : null,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(
